@@ -7,15 +7,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.jwt.entity.User;
 import com.example.jwt.payloads.requests.LoginRequest;
+import com.example.jwt.payloads.responses.JwtResponse;
+import com.example.jwt.payloads.responses.MessageResponse;
 import com.example.jwt.repository.UserRepository;
 import com.example.jwt.security.jwt.JwtUtils;
 
+@CrossOrigin(origins = "*")
 @RestController
 public class AuthController {
 
@@ -35,11 +39,11 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         
         if(userRepository.existsByUsername(user.getUsername())) {
-            return ResponseEntity.badRequest().body("Username is already taken");
+            return ResponseEntity.badRequest().body(new MessageResponse("Username is already taken"));
         }
 
         if(userRepository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Email is already in use");
+            return ResponseEntity.badRequest().body(new MessageResponse("Email already in use"));
         }
         
         User newUser = new User();
@@ -49,7 +53,7 @@ public class AuthController {
         
         userRepository.save(newUser);
 
-        return ResponseEntity.ok("User created successfully");
+        return ResponseEntity.ok(new MessageResponse("User created successfully."));
     }
 
     @PostMapping("/auth/login")
@@ -62,7 +66,9 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        return ResponseEntity.ok(jwt);
+        User user = userRepository.findByUsername(request.getUsername()).orElse(null);
+
+        return ResponseEntity.ok(new JwtResponse(jwt,user.getId(),user.getUsername(),user.getEmail()));
     }
     
 }
