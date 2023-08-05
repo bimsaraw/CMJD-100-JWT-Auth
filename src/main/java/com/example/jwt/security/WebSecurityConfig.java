@@ -23,11 +23,16 @@ import com.example.jwt.security.jwt.AuthTokenFilter;
 public class WebSecurityConfig {
     
     @Autowired
-    UserDetailsService userDetailsService; //TODO: How to fix this error?
+    private UserDetailsServiceImpl userDetailsService; //TODO: How to fix this error?
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
-    
+
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return userDetailsService;
+    }
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
