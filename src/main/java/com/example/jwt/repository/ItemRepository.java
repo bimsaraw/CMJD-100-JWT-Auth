@@ -7,5 +7,6 @@ import com.example.jwt.entity.Item;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long>{
+    //custom queries
     
 }
